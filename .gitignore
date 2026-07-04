@@ -1,5 +1,4 @@
 docs/
-images/
 
 # Não subir pasta target/
 app-stack/quarkus-api/target
