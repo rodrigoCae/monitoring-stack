@@ -53,8 +53,8 @@ Verifique se todos os contêineres iniciaram corretamente com `docker ps`. Você
 Para validar a eficácia dos alertas e o comportamento dos painéis em tempo real, execute o script de estresse:
 
 ```bash
-chmod +x chaos-load.sh
-./chaos-load.sh
+chmod +x ./scripts/chaos-load.sh
+./scripts/chaos-load.sh
 ```
 
 Esse script simulará alta carga de processamento de hardware, requisições massivas na API e varreduras maliciosas no proxy de borda, forçando o disparo de notificações no Slack e flutuações nos gráficos do Grafana.
