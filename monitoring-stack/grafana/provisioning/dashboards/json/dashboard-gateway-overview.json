@@ -1,0 +1,116 @@
+{
+  "title": "Gateway de Pagamentos - Overview",
+  "uid": "gateway-overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    { "type": "row", "title": "Infraestrutura (Node Exporter)", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "id": 100 },
+
+    {
+      "id": 1, "type": "timeseries", "title": "CPU Usage (%)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "steps": [
+        { "color": "green", "value": null }, { "color": "yellow", "value": 70 }, { "color": "red", "value": 85 }
+      ] } }, "overrides": [] },
+      "targets": [{ "expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[2m])) * 100)", "legendFormat": "CPU {{instance}}" }]
+    },
+    {
+      "id": 2, "type": "timeseries", "title": "Memória Disponível",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [
+        { "expr": "node_memory_MemTotal_bytes", "legendFormat": "Total" },
+        { "expr": "node_memory_MemAvailable_bytes", "legendFormat": "Disponível" }
+      ]
+    },
+    {
+      "id": 3, "type": "timeseries", "title": "Load Average (1/5/15m)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "node_load1", "legendFormat": "load1" },
+        { "expr": "node_load5", "legendFormat": "load5" },
+        { "expr": "node_load15", "legendFormat": "load15" }
+      ]
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "Tráfego de Rede",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "Bps" }, "overrides": [] },
+      "targets": [
+        { "expr": "rate(node_network_receive_bytes_total[1m])", "legendFormat": "RX {{device}}" },
+        { "expr": "rate(node_network_transmit_bytes_total[1m])", "legendFormat": "TX {{device}}" }
+      ]
+    },
+    {
+      "id": 5, "type": "gauge", "title": "Disco Disponível",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 17 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [{ "expr": "node_filesystem_avail_bytes{fstype!=\"tmpfs\"}", "legendFormat": "{{mountpoint}}" }]
+    },
+
+    { "type": "row", "title": "Nginx", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 }, "id": 101 },
+    {
+      "id": 10, "type": "stat", "title": "Nginx Up",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "mappings": [
+        { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+      ] }, "overrides": [] },
+      "targets": [{ "expr": "nginx_up" }]
+    },
+    {
+      "id": 11, "type": "timeseries", "title": "Conexões Ativas",
+      "gridPos": { "h": 8, "w": 10, "x": 4, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "nginx_connections_active", "legendFormat": "ativas" }]
+    },
+    {
+      "id": 12, "type": "timeseries", "title": "Requisições HTTP/s",
+      "gridPos": { "h": 8, "w": 10, "x": 14, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(nginx_http_requests_total[1m])", "legendFormat": "req/s" }]
+    },
+
+    { "type": "row", "title": "PostgreSQL", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 34 }, "id": 102 },
+    {
+      "id": 20, "type": "timeseries", "title": "Conexões Ativas no Banco",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 35 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "pg_stat_activity_count", "legendFormat": "{{datname}}" }]
+    },
+    {
+      "id": 21, "type": "timeseries", "title": "Leituras/Escritas (tup)",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 35 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "rate(pg_stat_database_tup_fetched[1m])", "legendFormat": "fetched" },
+        { "expr": "rate(pg_stat_database_tup_inserted[1m])", "legendFormat": "inserted" }
+      ]
+    },
+    {
+      "id": 22, "type": "timeseries", "title": "Locks Ativos / Tamanho do Banco",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 35 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "pg_locks_count", "legendFormat": "locks" },
+        { "expr": "pg_database_size_bytes", "legendFormat": "size bytes" }
+      ]
+    },
+
+    { "type": "row", "title": "Alertas Ativos", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 43 }, "id": 103 },
+    {
+      "id": 30, "type": "table", "title": "Alertas em FIRING",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 44 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "ALERTS{alertstate=\"firing\"}", "format": "table", "instant": true }]
+    }
+  ]
+}

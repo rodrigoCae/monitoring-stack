@@ -1,0 +1,46 @@
+groups:
+  - name: infra_alerts
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instancia {{ $labels.instance }} fora do ar!"
+          description: "Scrape falhando por mais de 1 minuto na instancia."
+          runbook_url: "https://github.com/runbooks/infra/instance-down.md"
+
+      - alert: HostHighCpuLoad
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Uso de CPU elevado em {{ $labels.instance }}"
+          description: "Consumo de CPU atingiu {{ printf \"%.2f\" $value }}%."
+          runbook_url: "https://github.com/runbooks/infra/high-cpu.md"
+
+  - name: application_alerts
+    rules:
+      - alert: QuarkusHighHttp5xxRate
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[2m])) by (uri) / sum(rate(http_server_requests_seconds_count[2m])) by (uri) * 100 > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Erros 5xx na rota {{ $labels.uri }}"
+          description: "Mais de 5% das chamadas na rota resultaram em falha do servidor."
+          runbook_url: "https://github.com/runbooks/apps/http-5xx.md"
+
+  - name: security_alerts
+    rules:
+      - alert: PotentialBruteForceOrScan
+        expr: sum(rate(nginx_ingress_controller_requests{status=~"40[1,3,4]"}[1m])) by (ingress) > 20
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Anomalia de Erros 4xx no Ingress/Nginx"
+          description: "Detectadas mais de 20 requisições com falha por segundo. Possível Scan ou Brute Force."
+          runbook_url: "https://github.com/runbooks/security/4xx-anomaly.md"
